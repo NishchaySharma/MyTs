@@ -1,0 +1,73 @@
+const Category = require('../models/category');
+
+//Create
+exports.createCategory = (req, res) => {
+    const category = new Category(req.body);
+    category.save((err, category) => {
+        if(err) {
+            return res.status(400).json({
+                error: 'Not able to save category in DB'
+            });
+        }
+        res.json({ category });
+    });
+};
+
+//Read
+
+    //Middleware to set category in body
+exports.getCategoryById = (req, res, next, id) => {
+    Category.findById(id).exec((err, cat) => {
+        if(err) {
+            return res.status(400).json({
+                error: 'Category not found in DB!'
+            });
+        }
+        req.category = cat;
+        next();
+    });
+};
+
+exports.getCategory = (req, res) => {
+    return res.json(req.category);
+};
+
+exports.getAllCategories = (req, res) => {
+    Category.find().exec((err, categories) => {
+        if(err) {
+            return res.status(400).json({
+                error: 'No categroy found!'
+            });
+        }
+        res.json(categories);
+    });
+};
+
+//Update
+exports.updateCategory = (req, res) => {
+    const category = req.category;
+    category.name = req.body.name;
+    category.save((err, updatedCategory) => {
+        if(err) {
+            return res.status(400).json({
+                error: 'Failed to update the category!'
+            });
+        }
+        res.json(updatedCategory);
+    });
+};
+
+//Delete
+exports.removeCategory = (req, res) => {
+    const category = req.category;
+    category.deleteOne({ _id: category._id}, (err) => {
+        if(err) {
+            return res.status(400).json({
+                error: 'Failed to delete this category!'
+            });
+        }
+        res.json({
+            message: `${category.name} Successfully deleted!`
+        });
+    });
+};
